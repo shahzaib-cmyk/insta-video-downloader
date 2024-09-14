@@ -19,7 +19,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 
-import { downloadFile } from "@/lib/utils";
+import { downloadFile, downloadFileToDisk } from "@/lib/utils";
 import { getHttpErrorMessage } from "@/lib/http";
 
 import { useVideoInfo } from "@/services/api/queries";
@@ -38,7 +38,7 @@ export function InstagramVideoForm() {
     },
   });
 
-  const { error, isPending, mutateAsync: getVideoInfo } = useVideoInfo();
+  const { error, isPending, mutateAsync: getVideoInfo, data } = useVideoInfo();
 
   const httpError = getHttpErrorMessage(error);
 
@@ -49,58 +49,72 @@ export function InstagramVideoForm() {
       const videoInfo = await getVideoInfo({ postUrl });
 
       const { filename, videoUrl } = videoInfo;
-      downloadFile(videoUrl, { filename });
+      downloadFileToDisk(videoUrl);
+      // downloadFile(videoUrl, { filename });
     } catch (error: any) {
       console.log(error);
     }
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="bg-accent/20 my-4 flex w-full max-w-2xl flex-col items-center rounded-lg border px-4 pb-16 pt-8 shadow-md sm:px-8"
-      >
-        <div className="mb-2 h-6 w-full px-2 text-start text-red-500">
-          {httpError}
-        </div>
-        <div className="relative mb-6 flex w-full flex-col items-center gap-4 sm:flex-row">
-          <FormField
-            control={form.control}
-            name="postUrl"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    disabled={isPending}
-                    type="url"
-                    placeholder="Paste your Instagram link here..."
-                    className="h-12 w-full sm:pr-28"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="my-4 flex flex-col gap-2">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex w-full max-w-2xl flex-col items-center rounded-lg border bg-accent/20 px-4 pb-16 pt-8 shadow-md sm:px-8"
+        >
+          <div className="mb-2 h-6 w-full px-2 text-start text-red-500">
+            {httpError}
+          </div>
+          <div className="relative mb-6 flex w-full flex-col items-center gap-4 sm:flex-row">
+            <FormField
+              control={form.control}
+              name="postUrl"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      disabled={isPending}
+                      type="url"
+                      placeholder="Paste your Instagram link here..."
+                      className="h-12 w-full sm:pr-28"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="right-1 top-1 w-full sm:absolute sm:w-fit"
+            >
+              {isPending ? (
+                <Loader2 className="mr-2 animate-spin" />
+              ) : (
+                <Download className="mr-2" />
+              )}
+              Download
+            </Button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            If the download opens a new page, right click the video and then
+            click Save as video.
+          </p>
+        </form>
+      </Form>
+      {data && (
+        <div className="flex w-full max-w-2xl flex-col items-center gap-4 rounded-lg border bg-accent/20 px-4 pb-12 pt-8 shadow-md sm:px-8">
+          <video src={data.videoUrl} />
           <Button
-            disabled={isPending}
-            type="submit"
-            className="right-1 top-1 w-full sm:absolute sm:w-fit"
+            className="flex flex-1"
+            onClick={() => downloadFileToDisk(data.videoUrl)}
           >
-            {isPending ? (
-              <Loader2 className="mr-2 animate-spin" />
-            ) : (
-              <Download className="mr-2" />
-            )}
             Download
           </Button>
         </div>
-        <p className="text-muted-foreground text-center text-xs">
-          If the download opens a new page, right click the video and then click{" "}
-          Save as video.
-        </p>
-      </form>
-    </Form>
+      )}
+    </div>
   );
 }
