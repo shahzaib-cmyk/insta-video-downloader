@@ -51,6 +51,7 @@ export async function GET(request: Request) {
     const response = makeSuccessResponse<ResolvedInfo>(postJson);
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
+    console.log(error);
     return handleError(error);
   }
 }
