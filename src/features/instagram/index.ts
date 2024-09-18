@@ -78,7 +78,7 @@ const getPictureJsonFromHTML = async (postId: string) => {
     return null;
   }
 
-  const imageInfo = await formatPictureJson({ url: data.urL, blob: data.blob });
+  const imageInfo = await formatPictureJson({ url: data.url, blob: data.blob });
   console.log({ imageInfo });
   return imageInfo;
 };

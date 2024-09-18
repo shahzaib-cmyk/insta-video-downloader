@@ -125,7 +125,7 @@ export const formatPictureJson = async ({
   blob: Blob;
 }) => {
   const filename = getIGImageFileName();
-  await storeBufferinMediaFolder(blob, filename);
+  // await storeBufferinMediaFolder(blob, filename);
 
   const imageJSON: ResolvedInfo = {
     type: "image",
@@ -135,7 +135,7 @@ export const formatPictureJson = async ({
     width: "",
     height: "",
     // url,
-    url: `/api/file?name=${filename}`,
+    url: `/api/image?url=${url}`,
   };
 
   return imageJSON;

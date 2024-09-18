@@ -60,13 +60,13 @@ export async function getPostImage({ postId }: { postId: string }) {
   } catch (error) {
     console.log(error);
   }
-  const imgRes = await fetch(res.url);
-  console.log({ imgRes });
+  // const imgRes = await fetch(res.url);
+  // console.log({ imgRes });
 
   const blobData = await res.blob();
 
   return {
-    urL: res.url,
+    url: res.url,
     blob: blobData,
   };
 }
