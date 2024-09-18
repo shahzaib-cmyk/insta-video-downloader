@@ -33,17 +33,17 @@ export async function downloadFileToDisk(data: ResolvedInfo) {
   const { downloadtype } = data;
 
   if (downloadtype === "blob") {
-    console.log(typeof data.blob);
-    console.log(data.blob);
-    // const blob = new Blob([await data.blob.text()], { type: data.blob.type });
-    const url = window.URL.createObjectURL(data.blob);
-    const a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = data.filename ? data.filename : "noname.mp4"; // Specify file name
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url); // Clean up
+    // console.log(typeof data.blob);
+    // console.log(data.blob);
+    // // const blob = new Blob([await data.blob.text()], { type: data.blob.type });
+    // const url = window.URL.createObjectURL(data.blob);
+    // const a = document.createElement("a");
+    // a.style.display = "none";
+    // a.href = url;
+    // a.download = data.filename ? data.filename : "noname.mp4"; // Specify file name
+    // document.body.appendChild(a);
+    // a.click();
+    // window.URL.revokeObjectURL(url); // Clean up
     return;
   }
   await fetch(data.url)
