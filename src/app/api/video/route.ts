@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 import { HTTPError } from "@/lib/errors";
 import { makeErrorResponse, makeSuccessResponse } from "@/lib/http";
 
-import { VideoInfo } from "@/types";
-import { getVideoInfo } from "@/features/instagram";
+import { ResolvedInfo } from "@/types";
+import { getPictureInfo, getVideoInfo } from "@/features/instagram";
 import { INSTAGRAM_CONFIGS } from "@/features/instagram/constants";
-import { getPostIdFromUrl } from "@/features/instagram/utils";
+import { getPostInfoFromURL } from "@/features/instagram/utils";
 
 function handleError(error: any) {
   if (error instanceof HTTPError) {
@@ -31,15 +31,19 @@ export async function GET(request: Request) {
     return NextResponse.json(badRequestResponse, { status: 400 });
   }
 
-  const postId = getPostIdFromUrl(postUrl);
-  if (!postId) {
+  const postInfo = getPostInfoFromURL(postUrl);
+  if (!postInfo) {
     const noPostIdResponse = makeErrorResponse("Invalid Post URL");
     return NextResponse.json(noPostIdResponse, { status: 400 });
   }
 
   try {
-    const postJson = await getVideoInfo(postId);
-    const response = makeSuccessResponse<VideoInfo>(postJson);
+    const postJson =
+      postInfo.type === "reel"
+        ? await getVideoInfo(postInfo.postId)
+        : await getPictureInfo(postInfo.postId);
+    // console.log({ postJson });
+    const response = makeSuccessResponse<ResolvedInfo>(postJson);
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
     return handleError(error);

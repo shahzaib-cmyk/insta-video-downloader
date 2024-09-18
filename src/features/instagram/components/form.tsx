@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React from "react";
@@ -23,6 +24,7 @@ import { downloadFile, downloadFileToDisk } from "@/lib/utils";
 import { getHttpErrorMessage } from "@/lib/http";
 
 import { useVideoInfo } from "@/services/api/queries";
+import Image from "next/image";
 
 const formSchema = z.object({
   postUrl: z.string().url({
@@ -46,10 +48,9 @@ export function InstagramVideoForm() {
     const { postUrl } = values;
     try {
       console.log("getting video info", postUrl);
-      const videoInfo = await getVideoInfo({ postUrl });
+      const info = await getVideoInfo({ postUrl });
 
-      const { filename, videoUrl } = videoInfo;
-      downloadFileToDisk(videoUrl);
+      downloadFileToDisk(info);
       // downloadFile(videoUrl, { filename });
     } catch (error: any) {
       console.log(error);
@@ -106,10 +107,21 @@ export function InstagramVideoForm() {
       </Form>
       {data && (
         <div className="flex w-full max-w-2xl flex-col items-center gap-4 rounded-lg border bg-accent/20 px-4 pb-12 pt-8 shadow-md sm:px-8">
-          <video src={data.videoUrl} />
+          {data.type === "video" && data.downloadtype === "url" ? (
+            <video src={data.url} />
+          ) : data.downloadtype === "url" ? (
+            <img src={data.url} alt="image" width={100} height={100} />
+          ) : (
+            <img
+              // src={data.blob.arrayBuffer}
+              alt="image"
+              width={100}
+              height={100}
+            />
+          )}
           <Button
             className="flex flex-1"
-            onClick={() => downloadFileToDisk(data.videoUrl)}
+            onClick={() => downloadFileToDisk(data)}
           >
             Download
           </Button>

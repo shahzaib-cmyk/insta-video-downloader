@@ -10,6 +10,7 @@ export async function getPostPageHTML({
 }: {
   postId: string;
 }): Promise<string> {
+  console.log(`Making a request to ${InstagramEndpoints.GetByPost}/${postId}`);
   const res = await apiClient.get(`${InstagramEndpoints.GetByPost}/${postId}`, {
     baseURL: "https://www.instagram.com",
     headers: {
@@ -28,6 +29,46 @@ export async function getPostPageHTML({
   const data = await res.text();
 
   return data;
+}
+
+export async function getPostImage({ postId }: { postId: string }) {
+  console.log(
+    `Making a request to ${InstagramEndpoints.GetByPost}/${postId}/media/?size=l`
+  );
+  const res = await apiClient.get(
+    `${InstagramEndpoints.GetByPost}/${postId}/media/?size=l`,
+    {
+      baseURL: "https://www.instagram.com",
+      headers: {
+        accept: "*/*",
+        host: "www.instagram.com",
+        referer: "https://www.instagram.com/",
+        DNT: "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0",
+      },
+    }
+  );
+  console.log({ res });
+  try {
+    console.log({ url: res.url });
+    const imgRes = await fetch(res.url);
+    console.log(imgRes);
+  } catch (error) {
+    console.log(error);
+  }
+  const imgRes = await fetch(res.url);
+  console.log({ imgRes });
+
+  const blobData = await res.blob();
+
+  return {
+    urL: res.url,
+    blob: blobData,
+  };
 }
 
 export async function getPostGraphqlData({

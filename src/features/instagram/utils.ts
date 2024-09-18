@@ -3,19 +3,26 @@ import querystring from "querystring";
 
 import { getTimedFilename } from "@/lib/utils";
 
-import { VideoInfo } from "@/types";
+import { ResolvedInfo } from "@/types";
 import { MediaData } from "./types";
+import path from "path";
+import fs from "fs";
 
 export const getIGVideoFileName = () =>
   getTimedFilename("ig-downloader", "mp4");
+export const getIGImageFileName = () =>
+  getTimedFilename("ig-downloader", "jpeg");
 
-export const getPostIdFromUrl = (postUrl: string) => {
+export const getPostInfoFromURL = (postUrl: string) => {
   const postRegex =
     /^https:\/\/(?:www\.)?instagram\.com\/p\/([a-zA-Z0-9_-]+)\/?/;
   const reelRegex =
     /^https:\/\/(?:www\.)?instagram\.com\/reels?\/([a-zA-Z0-9_-]+)\/?/;
 
-  return postUrl.match(postRegex)?.at(-1) || postUrl.match(reelRegex)?.at(-1);
+  if (postUrl.match(postRegex)?.at(-1) !== undefined)
+    return { type: "post" as const, postId: postUrl.match(postRegex)?.at(-1)! };
+  if (postUrl.match(reelRegex)?.at(-1) !== undefined)
+    return { type: "reel" as const, postId: postUrl.match(reelRegex)?.at(-1)! };
 };
 
 export const encodeGraphqlRequestData = (shortcode: string) => {
@@ -67,13 +74,15 @@ export const formatGraphqlJson = (data: MediaData) => {
   const filename = getIGVideoFileName();
   const width = data.dimensions.width.toString();
   const height = data.dimensions.height.toString();
-  const videoUrl = data.video_url;
+  const url = data.video_url;
 
-  const videoJson: VideoInfo = {
+  const videoJson: ResolvedInfo = {
+    type: "video",
+    downloadtype: "url",
     filename,
     width,
     height,
-    videoUrl,
+    url,
   };
 
   return videoJson;
@@ -86,8 +95,8 @@ export const formatPageJson = (postHtml: CheerioAPI) => {
     return null;
   }
 
-  const videoUrl = videoElement.attr("content");
-  if (!videoUrl) return null;
+  const url = videoElement.attr("content");
+  if (!url) return null;
 
   const width =
     postHtml("meta[property='og:video:width']").attr("content") ?? "";
@@ -96,14 +105,40 @@ export const formatPageJson = (postHtml: CheerioAPI) => {
 
   const filename = getIGVideoFileName();
 
-  const videoJson: VideoInfo = {
+  const videoJson: ResolvedInfo = {
+    type: "video",
+    downloadtype: "url",
     filename,
     width,
     height,
-    videoUrl,
+    url,
   };
 
   return videoJson;
+};
+
+export const formatPictureJson = async ({
+  url,
+  blob,
+}: {
+  url: string;
+  blob: Blob;
+}) => {
+  const filename = getIGImageFileName();
+  await storeBufferinMediaFolder(blob, filename);
+
+  const imageJSON: ResolvedInfo = {
+    type: "image",
+    downloadtype: "url",
+    // blob: await blob.text(),
+    filename,
+    width: "",
+    height: "",
+    // url,
+    url: `/api/file?name=${filename}`,
+  };
+
+  return imageJSON;
 };
 
 export const isValidInstagramURL = (postUrl: string) => {
@@ -131,3 +166,16 @@ export const isValidInstagramURL = (postUrl: string) => {
 
   return "";
 };
+
+export async function storeBufferinMediaFolder(bolb: Blob, filename: string) {
+  const arrayBuffer = await bolb.arrayBuffer();
+
+  // Convert ArrayBuffer to Buffer (Node.js compatible)
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Define the file path (you can store the file wherever you want in your project)
+  const filePath = path.join(process.cwd(), "media", filename); // store it in the 'uploads' folder
+
+  // Write the file to the filesystem
+  await fs.writeFileSync(filePath, buffer);
+}

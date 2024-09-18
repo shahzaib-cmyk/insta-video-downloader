@@ -12,12 +12,25 @@ export type SiteConfig = {
 export type Unit = "ms" | "s" | "m" | "h" | "d";
 export type Duration = `${number} ${Unit}` | `${number}${Unit}`;
 
-export type VideoInfo = {
+export type ResolvedURL = {
+  type: "image" | "video";
+  downloadtype: "url";
   filename: string;
   width: string;
   height: string;
-  videoUrl: string;
+  url: string;
 };
+
+export type ResolvedBlob = {
+  type: "image" | "video";
+  downloadtype: "blob";
+  filename: string;
+  width: string;
+  height: string;
+  blob: string;
+};
+
+export type ResolvedInfo = ResolvedURL | ResolvedBlob;
 
 export type SuccessResponse<T> = {
   status: "success";
