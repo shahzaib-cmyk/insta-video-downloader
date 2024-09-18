@@ -20,6 +20,7 @@ function handleError(error: any) {
 }
 
 export async function GET(request: Request) {
+  console.log(`/api/video route hit`);
   if (!INSTAGRAM_CONFIGS.enableServerAPI) {
     const notImplementedResponse = makeErrorResponse("Not Implemented");
     return NextResponse.json(notImplementedResponse, { status: 501 });
@@ -30,12 +31,14 @@ export async function GET(request: Request) {
     const badRequestResponse = makeErrorResponse("Post URL is required");
     return NextResponse.json(badRequestResponse, { status: 400 });
   }
-
+  console.log(`resolving post info`);
   const postInfo = getPostInfoFromURL(postUrl);
   if (!postInfo) {
     const noPostIdResponse = makeErrorResponse("Invalid Post URL");
     return NextResponse.json(noPostIdResponse, { status: 400 });
   }
+
+  console.log(`getting info about media`);
 
   try {
     const postJson =
@@ -43,6 +46,8 @@ export async function GET(request: Request) {
         ? await getVideoInfo(postInfo.postId)
         : await getPictureInfo(postInfo.postId);
     // console.log({ postJson });
+    console.log(`media info resolved`);
+
     const response = makeSuccessResponse<ResolvedInfo>(postJson);
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
