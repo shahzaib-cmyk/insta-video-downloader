@@ -53,13 +53,7 @@ export async function getPostImage({ postId }: { postId: string }) {
     }
   );
   console.log({ res });
-  try {
-    console.log({ url: res.url });
-    const imgRes = await fetch(res.url);
-    console.log(imgRes);
-  } catch (error) {
-    console.log(error);
-  }
+
   // const imgRes = await fetch(res.url);
   // console.log({ imgRes });
 

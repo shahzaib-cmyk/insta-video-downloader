@@ -87,6 +87,7 @@ export const getPictureInfo = async (postId: string) => {
   let pictureInfo: ResolvedInfo | null = null;
 
   if (INSTAGRAM_CONFIGS.enableWebpage) {
+    console.log(`Getting picture info from html`);
     pictureInfo = await getPictureJsonFromHTML(postId);
     if (pictureInfo) return pictureInfo;
   }
